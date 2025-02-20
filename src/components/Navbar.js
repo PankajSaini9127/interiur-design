@@ -1,59 +1,168 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Container, useMediaQuery, Drawer, List, ListItem, IconButton } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Container,
+  useMediaQuery,
+  Drawer,
+  List,
+  ListItem,
+  IconButton,
+  Box,
+  Menu,
+  MenuItem,
+  useTheme,
+  ListItemIcon,
+  ListItemText,
+  Avatar,
+  Fade
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
+import HomeIcon from '@mui/icons-material/Home';
+import InfoIcon from '@mui/icons-material/Info';
+import BuildIcon from '@mui/icons-material/Build';
+import ContactMailIcon from '@mui/icons-material/ContactMail';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import logo from './logo-transparent.png';
+
+const menuItems = [
+  { text: 'Home', icon: <HomeIcon />, path: '/' },
+  { 
+    text: 'About Us', 
+    icon: <InfoIcon />, 
+    path: '/about',
+    subItems: [
+      { text: 'Our Team', path: '/about/team' },
+      { text: 'Our History', path: '/about/history' },
+      { text: 'Mission & Vision', path: '/about/mission' }
+    ]
+  },
+  { text: 'Services', icon: <BuildIcon />, path: '/services' },
+  { text: 'Contact', icon: <ContactMailIcon />, path: '/contact' }
+];
 
 const Navbar = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const [aboutMenuAnchor, setAboutMenuAnchor] = React.useState(null);
 
-  const toggleDrawer = (open) => () => {
-    setDrawerOpen(open);
-  };
+  const handleAboutMenu = (event) => setAboutMenuAnchor(event?.currentTarget || null);
 
-  const menuItems = (
-    <List>
-      <ListItem button component={Link} to="/" onClick={toggleDrawer(false)}>
-        Home
-      </ListItem>
-      <ListItem button component={Link} to="/about" onClick={toggleDrawer(false)}>
-        About Us
-      </ListItem>
-      <ListItem button component={Link} to="/services" onClick={toggleDrawer(false)}>
-        Services
-      </ListItem>
-      <ListItem button component={Link} to="/contact" onClick={toggleDrawer(false)}>
-        Contact
-      </ListItem>
-    </List>
+  const DrawerContent = () => (
+    <Box role="presentation" onClick={() => setDrawerOpen(false)} onKeyDown={() => setDrawerOpen(false)}>
+      <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider', bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+        <Avatar sx={{ width: 40, height: 40, m: '0 auto', bgcolor: 'secondary.main' }}>ED</Avatar>
+      </Box>
+      <List>
+        {menuItems.map((item) => (
+          <React.Fragment key={item.text}>
+            <ListItem button component={Link} to={item.path} sx={{ 
+              py: 1, 
+              '&:hover': { 
+                bgcolor: 'action.hover',
+                '& .MuiListItemIcon-root, & .MuiListItemText-primary': { color: 'primary.main' }
+              }
+            }}>
+              <ListItemIcon sx={{ minWidth: 40, color: 'text.secondary' }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItem>
+            {item.subItems?.map(subItem => (
+              <ListItem
+                button
+                key={subItem.text}
+                component={Link}
+                to={subItem.path}
+                sx={{ pl: 6, '&:hover': { bgcolor: 'action.hover', color: 'primary.main' } }}
+              >
+                <ListItemText primary={subItem.text} sx={{ color: 'text.secondary' }} />
+              </ListItem>
+            ))}
+          </React.Fragment>
+        ))}
+      </List>
+    </Box>
   );
 
   return (
-    <AppBar position="sticky">
-      <Toolbar>
-        <Container>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Interior Design Co.
-          </Typography>
+    <AppBar position="fixed" elevation={0} sx={{ bgcolor: "transparent", borderBottom: 1, borderColor: 'divider', height: 'auto' }}>
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ minHeight: '48px !important' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <img src={logo} alt="Era Design Logo" style={{ height: 32, width: 'auto' }} />
+          </Box>
+
           {isMobile ? (
-            <>
-              <IconButton color="inherit" onClick={toggleDrawer(true)}>
-                <MenuIcon />
-              </IconButton>
-              <Drawer open={drawerOpen} onClose={toggleDrawer(false)}>
-                {menuItems}
-              </Drawer>
-            </>
+            <IconButton edge="end" color="inherit" onClick={() => setDrawerOpen(true)} sx={{ p: 0.5 }}>
+              <MenuIcon />
+            </IconButton>
           ) : (
-            <>
-              <Button color="inherit" component={Link} to="/">Home</Button>
-              <Button color="inherit" component={Link} to="/about">About Us</Button>
-              <Button color="inherit" component={Link} to="/services">Services</Button>
-              <Button color="inherit" component={Link} to="/contact">Contact</Button>
-            </>
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              {menuItems.map((item) => (
+                item.subItems ? (
+                  <Box key={item.text}>
+                    <Button
+                      onClick={handleAboutMenu}
+                      endIcon={<KeyboardArrowDownIcon />}
+                      sx={{ 
+                        color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.background.paper,
+                        minHeight: '32px',
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                    >
+                      <h3 style={{color:theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.background.papertext.primary,}}>{item.text}</h3>
+                    </Button>
+                    <Menu
+                      anchorEl={aboutMenuAnchor}
+                      open={Boolean(aboutMenuAnchor)}
+                      onClose={() => handleAboutMenu()}
+                      TransitionComponent={Fade}
+                    >
+                      {item.subItems.map((subItem) => (
+                        <MenuItem
+                          key={subItem.text}
+                          component={Link}
+                          to={subItem.path}
+                          onClick={() => handleAboutMenu()}
+                          sx={{ py: 1, '&:hover': { bgcolor: 'action.hover' } }}
+                        >
+                          {subItem.text}
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  </Box>
+                ) : (
+                  <Button
+                    key={item.text}
+                    component={Link}
+                    to={item.path}
+                    startIcon={item.icon}
+                    sx={{ 
+                      color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.background.papertext.primary,
+                      minHeight: '32px',
+                      '&:hover': { bgcolor: 'action.hover' }
+                    }}
+                  >
+                    <h3 style={{color:theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.background.papertext.primary,}}>{item.text}</h3>
+                    
+                  </Button>
+                )
+              ))}
+            </Box>
           )}
-        </Container>
-      </Toolbar>
+
+          <Drawer
+            anchor="right"
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            PaperProps={{ sx: { bgcolor: 'background.default' } }}
+          >
+            <DrawerContent />
+          </Drawer>
+        </Toolbar>
+      </Container>
     </AppBar>
   );
 };

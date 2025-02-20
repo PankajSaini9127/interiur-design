@@ -8,21 +8,25 @@ import Contact from './components/Contact';
 import { CssBaseline, Container } from '@mui/material';
 import './App.css';
 import Footer from './components/Footer';
+import theme from './utils/theme';
+import { ThemeProvider } from '@mui/material/styles';
 
 const App = () => {
   return (
     <Router>
+      <ThemeProvider theme={theme}>
       <CssBaseline />
       <Navbar />
-      <Container>
+      {/* <Container> */}
         <Routes>
           <Route exact path="/" element={<Home/>} />
           <Route path="/about" element={<About/>} />
           <Route path="/services" element={<Services/>} />
           <Route path="/contact" element={<Contact/>} />
         </Routes>
-      </Container>
+      {/* </Container> */}
       <Footer/>
+      </ThemeProvider>
     </Router>
   );
 };
